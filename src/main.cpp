@@ -6,77 +6,23 @@ using namespace okapi;
 
 
 
-
-
-
-
-std::shared_ptr<OdomChassisController> chassis =
-  ChassisControllerBuilder()
-    .withMotors({20,19}, {9,17}) // left motor is 1, right motor is 2 (reversed)
-    // green gearset, 4 inch wheel diameter, 11.5 inch wheel track
-    .withDimensions({AbstractMotor::gearset::blue, 7.0/3.0}, {{4_in, 14.625_in}, imev5BlueTPR})
-		.withMaxVelocity(200)
-    // left encoder in ADI ports A & B, right encoder in ADI ports C & D
-    .withSensors(ADIEncoder{'A', 'B'}, ADIEncoder{'C', 'D', true}, {ADIEncoder{'G', 'H'}})
-    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
-    .withOdometry({{2.75_in, 14.75_in , 3_in, 2.75_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
-    .buildOdometry();
-
-
-		std::shared_ptr<ChassisController> myChassis =
-		  ChassisControllerBuilder()
-		    .withMotors({20,19}, {9,17})
-		    // Green gearset, 4 in wheel diam, 11.5 in wheel track
-		    .withDimensions({AbstractMotor::gearset::blue, 7.0/3.0}, {{4_in, 14.625_in}, imev5BlueTPR})
-				.withSensors(ADIEncoder{'A', 'B'}, ADIEncoder{'C', 'D', true}, {ADIEncoder{'G', 'H'}})
-		    .build();
-
-
- std::shared_ptr<AsyncMotionProfileController> profileController =
-   AsyncMotionProfileControllerBuilder()
-     .withLimits({
-       .5, // Maximum linear velocity of the Chassis in m/s
-       1.0, // Maximum linear acceleration of the Chassis in m/s/s
-      5.0 // Maximum linear jerk of the Chassis in m/s/s/s
-     })
-     .withOutput(myChassis)
-     .buildMotionProfileController();
-
-
-
-		 // make a file for globals later
-
-
-
-		 const double liftkP_front = 0.00295;
-		 const double liftkI_front = 0.00;
-		 const double liftkD_front = 0.00001;
-
-	std::shared_ptr<AsyncPositionController<double, double>> liftController_front =
-		   AsyncPosControllerBuilder()
-		     .withMotor({15, 14}) // lift motor port 3
-		     .withGains({liftkP_front, liftkI_front, liftkD_front})
-				 .withGearset({AbstractMotor::gearset::green, 5.0/1.0})
-		     .build();
-
-
-				 const double liftkP_back = 0.00375;
-				 const double liftkI_back = 0.00;
-				 const double liftkD_back = 0.0000;
-
-				 std::shared_ptr<AsyncPositionController<double, double>> liftController_back =
-				   AsyncPosControllerBuilder()
-				     .withMotor(-13) // lift motor port 3
-				     .withGains({liftkP_back, liftkI_back, liftkD_back})
-						 .withGearset({AbstractMotor::gearset::red, 5.0/1.0})
-				     .build();
-
-
-
-
-void rampingTwoGoals() {
-
+/**
+ * A callback function for LLEMU's center button.
+ *
+ * When this callback is fired, it will toggle line 2 of the LCD text between
+ * "I was pressed!" and nothing.
+ */
+void on_center_button() {
+	static bool pressed = false;
+	pressed = !pressed;
+	if (pressed) {
+		pros::lcd::set_text(2, "I was pressed!");
+	} else {
+		pros::lcd::clear_line(2);
+	}
 }
+
+
 
 
 
@@ -91,6 +37,7 @@ void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 
+	pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -140,15 +87,124 @@ void autonomous() {}
 
 
 
+pros::Motor frontLeft(20, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor backLeft(19, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 
+pros::Motor frontRight(9, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor backRight(17, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+
+pros::Motor conveyor(11, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+
+pros::Motor armLeft(15, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor armRight(14, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_COUNTS);
+
+pros::Motor back_mogo(13, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_COUNTS);
+
+pros::IMU inertial(12);
+
+pros::ADIEncoder leftEncoder('A','B');
+pros::ADIEncoder rightEncoder({6, 'A','B'}, true);
+pros::ADIEncoder midEncoder('G', 'H');
+
+
+pros::ADIDigitalOut front_piston({{6, 'G'}});
+pros::ADIDigitalOut back_piston('F');
+
+pros::ADIButton bumper_front({6,'C'});
+pros::ADIButton bumper_back({6,'D'});
+
+
+
+
+std::shared_ptr<OdomChassisController> chassis =
+  ChassisControllerBuilder()
+    .withMotors({20,19}, {9,17}) // left motor is 1, right motor is 2 (reversed)
+    // green gearset, 4 inch wheel diameter, 11.5 inch wheel track
+    .withDimensions({AbstractMotor::gearset::blue, 7.0/3.0}, {{4_in, 14.625_in}, imev5BlueTPR})
+		.withMaxVelocity(200)
+    // left encoder in ADI ports A & B, right encoder in ADI ports C & D
+    .withSensors(ADIEncoder{'A', 'B'}, ADIEncoder{{6, 'A','B'}, true}, {ADIEncoder{'G', 'H'}})
+    // specify the tracking wheels diameter (2.75 in), track (7 in), and TPR (360)
+    .withOdometry({{2.75_in, 14.75_in , 3_in, 2.75_in}, quadEncoderTPR}, StateMode::FRAME_TRANSFORMATION)
+    .buildOdometry();
+
+
+		std::shared_ptr<ChassisController> myChassis =
+		  ChassisControllerBuilder()
+		    .withMotors({20,19}, {9,17})
+		    // Green gearset, 4 in wheel diam, 11.5 in wheel track
+		    .withDimensions({AbstractMotor::gearset::blue, 7.0/3.0}, {{4_in, 14.625_in}, imev5BlueTPR})
+				.withSensors(ADIEncoder{'A', 'B'}, ADIEncoder{{6, 'A','B'}, true}, {ADIEncoder{'G', 'H'}})
+		    .build();
+
+
+ std::shared_ptr<AsyncMotionProfileController> profileControllerFast =
+   AsyncMotionProfileControllerBuilder()
+     .withLimits({
+       .5, // Maximum linear velocity of the Chassis in m/s
+       2.0, // Maximum linear acceleration of the Chassis in m/s/s
+      5.0 // Maximum linear jerk of the Chassis in m/s/s/s
+     })
+     .withOutput(myChassis)
+     .buildMotionProfileController();
+
+		 std::shared_ptr<AsyncMotionProfileController> profileControllerSlow =
+			 AsyncMotionProfileControllerBuilder()
+				 .withLimits({
+					 .25, // Maximum linear velocity of the Chassis in m/s
+					 1.0, // Maximum linear acceleration of the Chassis in m/s/s
+					2.5 // Maximum linear jerk of the Chassis in m/s/s/s
+				 })
+				 .withOutput(myChassis)
+				 .buildMotionProfileController();
+
+
+
+		 // make a file for globals later
+
+
+
+		 const double liftkP_front = 0.00295;
+		 const double liftkI_front = 0.00;
+		 const double liftkD_front = 0.00001;
+
+		 std::shared_ptr<AsyncPositionController<double, double>> liftController_front =
+		   AsyncPosControllerBuilder()
+		     .withMotor({15, 14}) // lift motor port 3
+		     .withGains({liftkP_front, liftkI_front, liftkD_front})
+				 .withGearset({AbstractMotor::gearset::green, 5.0/1.0})
+		     .build();
+
+
+				 const double liftkP_back = 0.00375;
+				 const double liftkI_back = 0.00;
+				 const double liftkD_back = 0.0000;
+
+				 std::shared_ptr<AsyncPositionController<double, double>> liftController_back =
+				   AsyncPosControllerBuilder()
+				     .withMotor(-13) // lift motor port 3
+				     .withGains({liftkP_back, liftkI_back, liftkD_back})
+						 .withGearset({AbstractMotor::gearset::red, 5.0/1.0})
+				     .build();
+
+
+
+
+void backMogoUp() {
+
+	while (!bumper_back.get_value()) {
+
+		back_mogo.move_velocity(-100);
+		pros::delay(2);
+	}
+	back_mogo.tare_position();
+	back_mogo.move_velocity(0);
+}
 
 
 void opcontrol() {
 
 
-
-// 290 POINTS SKILLS ROUTE
-//
 
 
 
@@ -158,6 +214,9 @@ void opcontrol() {
 		int piston_front_value = 0;
 		int piston_back_value = 0;
 
+		int conveyor_value = 0;
+
+		bool isUpBackMogo = true;
 
 
 	front_piston.set_value(false);
@@ -165,36 +224,46 @@ void opcontrol() {
 
 	armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
 	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
-
-	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
-
-
-// //FRONT LIFT
-// // start from starting lift position
-// //top to bottom
-// 	liftController_front->waitUntilSettled();
-// 	liftController_front->setTarget(-490);
-// 	pros::delay(500);
-//
-// 	// bottom to top
-// 	liftController_front->setTarget(0);
-
-// from starting position to scoring position
-// liftController_front->setTarget(-195);
-// liftController_front->waitUntilSettled();
-//
+	back_mogo.set_brake_mode(MOTOR_BRAKE_BRAKE);
 
 
 
-// // BACK LIFT
-// // from starting to down position
-// liftController_back->setTarget(-445);
+// 260 skills
+
+chassis->setState({0_ft, 0_ft, 180_deg});
+
+//first 20 seconds
+liftController_back->setTarget(-440);
+chassis->driveToPoint({25_in, 0_in}, true);
+chassis->waitUntilSettled();
+pros::delay(500);
+back_piston.set_value(true);
+liftController_back->setTarget(0);
+liftController_back->waitUntilSettled();
+pros::delay(500);
+
+profileControllerSlow->generatePath({{0_ft, 0_ft, 0_deg},{1_ft,1_ft,0_deg}}, "A");
+profileControllerSlow->setTarget("A", false, true);
+profileControllerSlow->waitUntilSettled();
+profileControllerSlow->removePath("A");
 
 
+liftController_front->setTarget(-480);
+liftController_front->waitUntilSettled();
+
+chassis->driveToPoint({2_ft, -4_ft});
+chassis->waitUntilSettled();
 
 
+front_piston.set_value(true);
+pros::delay(1000);
 
+liftController_front->setTarget(0);
 
+profileControllerFast->generatePath({{0_ft, 0_ft, 10_deg},{3.25_ft,3.25_ft,0_deg}}, "B");
+profileControllerFast->setTarget("B", false, true);
+profileControllerFast->waitUntilSettled();
+profileControllerFast->removePath("B");
 
 
 
@@ -214,10 +283,14 @@ void opcontrol() {
 		frontRight = right;
 		backRight = right;
 
-		// front and back claw variables
+
 
 		bool isPressedFrontPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
 		bool isPressedBackPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2);
+
+		bool isPressedConveyor = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT);
+
+
 
 
 		//front claw piston - top left trigger
@@ -245,33 +318,48 @@ void opcontrol() {
 		}
 
 
+		//
+
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-		 armLeft.move_velocity(200); //rpm
-		 armRight.move_velocity(200); //rpm
+		 armLeft = 127; //rpm
+		 armRight = 127; //rpm
 
 	 }
 	 else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-		 armLeft.move_velocity(-200);
-		 armRight.move_velocity(-200);
+		 armLeft = -127;
+		 armRight = -127;
 	 }
 	 else {
-		 armLeft.move_velocity(0);
-		 armRight.move_velocity(0);
-
-
+		 armLeft = 0;
+		 armRight = 0;
 	 }
 
 
 
-	 if (master.get_digital(DIGITAL_Y)) {
-		conveyor.move_velocity(600); //rpm
+	 if (isPressedConveyor && conveyor_value % 2 == 0) {
+		conveyor = 127; //rpm
+		conveyor_value++;
 	}
-	else if (master.get_digital(DIGITAL_RIGHT)) {
-		conveyor.move_velocity(-600);
+	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)  && conveyor_value % 2 == 1) {
+		conveyor = 0;
+		conveyor_value++;
 	}
-	else {
-		conveyor.move_velocity(0);
+	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+		conveyor = -127;
 	}
+
+
+
+	if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y) && isUpBackMogo) {
+			liftController_back->setTarget(-445);
+			isUpBackMogo = false;
+	} else if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y) && !bumper_back.get_value()) {
+			back_mogo = 127;
+			isUpBackMogo = true;
+	} else {
+		liftController_back = 0;
+	}
+
 
 
 
