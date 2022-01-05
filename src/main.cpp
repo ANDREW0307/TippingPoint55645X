@@ -110,8 +110,11 @@ pros::ADIEncoder midEncoder('G', 'H');
 pros::ADIDigitalOut front_piston({{6, 'G'}});
 pros::ADIDigitalOut back_piston('F');
 
-pros::ADIButton bumper_front({6,'C'});
-pros::ADIButton bumper_back({6,'D'});
+pros::ADIButton bumper_front_up({6,'C'});
+// pros::ADIButton bumper_front_down({6,'C'});
+pros::ADIButton bumper_back_up({6,'D'});
+pros::ADIButton bumper_back_down({6,'H'});
+
 
 
 
@@ -168,31 +171,31 @@ std::shared_ptr<OdomChassisController> chassis =
 		 const double liftkI_front = 0.00;
 		 const double liftkD_front = 0.00001;
 
-		 std::shared_ptr<AsyncPositionController<double, double>> liftController_front =
-		   AsyncPosControllerBuilder()
-		     .withMotor({15, 14}) // lift motor port 3
-		     .withGains({liftkP_front, liftkI_front, liftkD_front})
-				 .withGearset({AbstractMotor::gearset::green, 5.0/1.0})
-		     .build();
-
+		 // std::shared_ptr<AsyncPositionController<double, double>> liftController_front =
+		 //   AsyncPosControllerBuilder()
+		 //     .withMotor({15, 14}) // lift motor port 3
+		 //     .withGains({liftkP_front, liftkI_front, liftkD_front})
+			// 	 .withGearset({AbstractMotor::gearset::green, 5.0/1.0})
+		 //     .build();
+		 //
 
 				 const double liftkP_back = 0.00375;
 				 const double liftkI_back = 0.00;
 				 const double liftkD_back = 0.0000;
 
-				 std::shared_ptr<AsyncPositionController<double, double>> liftController_back =
-				   AsyncPosControllerBuilder()
-				     .withMotor(-13) // lift motor port 3
-				     .withGains({liftkP_back, liftkI_back, liftkD_back})
-						 .withGearset({AbstractMotor::gearset::red, 5.0/1.0})
-				     .build();
+				 // std::shared_ptr<AsyncPositionController<double, double>> liftController_back =
+				 //   AsyncPosControllerBuilder()
+				 //     .withMotor(-13) // lift motor port 3
+				 //     .withGains({liftkP_back, liftkI_back, liftkD_back})
+					// 	 .withGearset({AbstractMotor::gearset::red, 5.0/1.0})
+				 //     .build();
 
 
 
 
 void backMogoUp() {
 
-	while (!bumper_back.get_value()) {
+	while (!bumper_back_up.get_value()) {
 
 		back_mogo.move_velocity(-100);
 		pros::delay(2);
@@ -224,49 +227,51 @@ void opcontrol() {
 
 	armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
 	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
-	back_mogo.set_brake_mode(MOTOR_BRAKE_BRAKE);
+	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
 
 
 
 // 260 skills
+//
+// chassis->setState({0_ft, 0_ft, 180_deg});
+//
+// //first 20 seconds
+// liftController_back->setTarget(-440);
+// chassis->driveToPoint({25_in, 0_in}, true);
+// chassis->waitUntilSettled();
+// pros::delay(500);
+// back_piston.set_value(true);
+// liftController_back->setTarget(0);
+// liftController_back->waitUntilSettled();
+// pros::delay(500);
+//
+// profileControllerSlow->generatePath({{0_ft, 0_ft, 0_deg},{1_ft,1_ft,0_deg}}, "A");
+// profileControllerSlow->setTarget("A", false, true);
+// profileControllerSlow->waitUntilSettled();
+// profileControllerSlow->removePath("A");
+//
+//
+// liftController_front->setTarget(-480);
+// liftController_front->waitUntilSettled();
+//
+// chassis->driveToPoint({2_ft, -4_ft});
+// chassis->waitUntilSettled();
+//
+//
+// front_piston.set_value(true);
+// pros::delay(1000);
+//
+// liftController_front->setTarget(0);
+//
+// profileControllerFast->generatePath({{0_ft, 0_ft, 10_deg},{3.25_ft,3.25_ft,0_deg}}, "B");
+// profileControllerFast->setTarget("B", false, true);
+// profileControllerFast->waitUntilSettled();
+// profileControllerFast->removePath("B");
 
-chassis->setState({0_ft, 0_ft, 180_deg});
-
-//first 20 seconds
-liftController_back->setTarget(-440);
-chassis->driveToPoint({25_in, 0_in}, true);
-chassis->waitUntilSettled();
-pros::delay(500);
-back_piston.set_value(true);
-liftController_back->setTarget(0);
-liftController_back->waitUntilSettled();
-pros::delay(500);
-
-profileControllerSlow->generatePath({{0_ft, 0_ft, 0_deg},{1_ft,1_ft,0_deg}}, "A");
-profileControllerSlow->setTarget("A", false, true);
-profileControllerSlow->waitUntilSettled();
-profileControllerSlow->removePath("A");
 
 
-liftController_front->setTarget(-480);
-liftController_front->waitUntilSettled();
-
-chassis->driveToPoint({2_ft, -4_ft});
-chassis->waitUntilSettled();
-
-
-front_piston.set_value(true);
-pros::delay(1000);
-
-liftController_front->setTarget(0);
-
-profileControllerFast->generatePath({{0_ft, 0_ft, 10_deg},{3.25_ft,3.25_ft,0_deg}}, "B");
-profileControllerFast->setTarget("B", false, true);
-profileControllerFast->waitUntilSettled();
-profileControllerFast->removePath("B");
-
-
-
+bool isPressedBackMogo = false;
+int backMogoVelocity = 0;
 
 	while (true) {
 
@@ -287,6 +292,8 @@ profileControllerFast->removePath("B");
 
 		bool isPressedFrontPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
 		bool isPressedBackPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2);
+
+
 
 		bool isPressedConveyor = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT);
 
@@ -318,47 +325,106 @@ profileControllerFast->removePath("B");
 		}
 
 
-		//
 
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-		 armLeft = 127; //rpm
-		 armRight = 127; //rpm
 
+
+		//ARM MOVEMENT
+
+		if (master.get_digital(DIGITAL_R1) && !bumper_front_up.get_value()) {
+			armLeft.move_velocity(200);
+		 armRight.move_velocity(200);
 	 }
-	 else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-		 armLeft = -127;
-		 armRight = -127;
+	 else if (master.get_digital(DIGITAL_R2)) {
+		 armLeft.move_velocity(-200);
+		 armRight.move_velocity(-200);
 	 }
 	 else {
-		 armLeft = 0;
-		 armRight = 0;
+		 armLeft.move_velocity(0);
+		 armRight.move_velocity(0);
 	 }
 
 
 
-	 if (isPressedConveyor && conveyor_value % 2 == 0) {
-		conveyor = 127; //rpm
-		conveyor_value++;
-	}
-	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)  && conveyor_value % 2 == 1) {
-		conveyor = 0;
-		conveyor_value++;
-	}
-	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
-		conveyor = -127;
-	}
+	//
+	//  if (isPressedConveyor && conveyor_value % 2 == 0) {
+	// 	conveyor = 127; //rpm
+	// 	conveyor_value++;
+	// }
+	// else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)  && conveyor_value % 2 == 1) {
+	// 	conveyor = 0;
+	// 	conveyor_value++;
+	// }
+	// else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+	// 	conveyor = -127;
+	// }
+	//
+	//
+	//
 
 
 
-	if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y) && isUpBackMogo) {
-			liftController_back->setTarget(-445);
+
+	//WAS PRESSED BACK MOGO
+	if (isPressedBackMogo) {
+		while (!bumper_back_down.get_value() && isUpBackMogo) {
+			backMogoVelocity = 200;
 			isUpBackMogo = false;
-	} else if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y) && !bumper_back.get_value()) {
-			back_mogo = 127;
+			break;
+		}
+		while (!bumper_back_up.get_value() && !isUpBackMogo) {
+			backMogoVelocity = -200;
 			isUpBackMogo = true;
-	} else {
-		liftController_back = 0;
+			break;
+		}
+		backMogoVelocity = 0;
+		isPressedBackMogo = false;
 	}
+
+	back_mogo.move_velocity(backMogoVelocity);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// int backMogoVelocity;
+	//
+	// if (bumper_back_up.get_value()) {
+	// 	isUpBackMogo = true;
+	// } else if (bumper_back_down.get_value()){
+	// 	isUpBackMogo = false;
+	// }
+	//
+	// if(isPressedBackMogo && !bumper_back_down.get_value() && isUpBackMogo ) {
+	// 	backMogoVelocity = 200;
+	// } else if(isPressedBackMogo && !bumper_back_up.get_value() && !isUpBackMogo) {
+	// 	backMogoVelocity = -200;
+	// } else {
+	// 	if (bumper_back_up.get_value() || bumper_back_down.get_value()) {
+	// 		backMogoVelocity = 0;
+	// 	}
+	// }
+	//
+	// // else {
+	// // 	backMogoVelocity = 0;
+	// // }
+	//
+	// back_mogo.move_velocity(backMogoVelocity);
+	//
+
 
 
 
