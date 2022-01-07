@@ -77,6 +77,14 @@ void opcontrol(void);
  */
 //#include <iostream>
 
+#include "subSystems/globals.hpp"
+#include "subSystems/mogo.hpp"
+#include "subSystems/tasks.hpp"
+#include "subSystems/builders.hpp"
+#include "okapi/api.hpp"
+
+
+
 #endif
 
 #endif  // _PROS_MAIN_H_
