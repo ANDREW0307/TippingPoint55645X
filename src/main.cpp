@@ -24,18 +24,19 @@ void initialize() {
 
 		pros::task_t back_mogo_control_task = pros::c::task_create(backMogoControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
 		TASK_STACK_DEPTH_DEFAULT, "My Task");
+		pros::task_t frontUpAutonTask = pros::c::task_create(front_mogo_up, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+		TASK_STACK_DEPTH_DEFAULT, "My Task");
+		pros::task_t frontDownAutonTask = pros::c::task_create(front_mogo_down, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+		TASK_STACK_DEPTH_DEFAULT, "My Task");
+
+
 
 		//GENERATE AUTON PATHFINDER COMMANDS HERE
 
 
 }
 
-/**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
- */
-void disabled() {}
+
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -60,6 +61,11 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+
+	pros::Task auton_task1 (frontUpAutonTask);
+	pros::Task auton_task2 (frontDownAutonTask);
+
+
 	// 260 skills
 	//
 	// chassis->setState({0_ft, 0_ft, 180_deg});
@@ -127,6 +133,8 @@ void opcontrol() {
 	pros::lcd::set_text(1, "Driving");
 
 
+		frontGoUp = false;
+		frontGoDown = false;
 
 
 		int piston_front_value = 0;

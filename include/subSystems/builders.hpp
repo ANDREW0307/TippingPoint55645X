@@ -3,12 +3,14 @@
 using namespace okapi;
 
 
-extern std::shared_ptr<OdomChassisController> chassis;
+
+  // odometry chassis
+  extern std::shared_ptr<OdomChassisController> chassis;
 
 
-		extern std::shared_ptr<ChassisController> myChassis;
-
-
- extern std::shared_ptr<AsyncMotionProfileController> profileControllerFast;
-
+  // 2d motion profiling fast and slow
+  extern std::shared_ptr<AsyncMotionProfileController> profileControllerFast;
 	extern	std::shared_ptr<AsyncMotionProfileController> profileControllerSlow;
+
+  // chassis for the fast and slow motion profilers
+  extern std::shared_ptr<ChassisController> myChassis;
