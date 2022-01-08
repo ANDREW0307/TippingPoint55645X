@@ -2,6 +2,8 @@
 
 using namespace okapi;
 
+#include "main.h"
+
 
 
 /**
@@ -15,19 +17,16 @@ void initialize() {
 		pros::lcd::set_text(1, "Initializing");
 
 
-		armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
-		armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
-		back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
+
 
 		front_piston.set_value(true);
 		back_piston.set_value(true);
 
-		pros::task_t back_mogo_control_task = pros::c::task_create(backMogoControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
-		TASK_STACK_DEPTH_DEFAULT, "My Task");
-		pros::task_t frontUpAutonTask = pros::c::task_create(front_mogo_up, (void*)"PROS", TASK_PRIORITY_DEFAULT,
-		TASK_STACK_DEPTH_DEFAULT, "My Task");
-		pros::task_t frontDownAutonTask = pros::c::task_create(front_mogo_down, (void*)"PROS", TASK_PRIORITY_DEFAULT,
-		TASK_STACK_DEPTH_DEFAULT, "My Task");
+		pros::lcd::set_text(1, "done");
+
+
+
+
 
 
 
@@ -62,9 +61,12 @@ void competition_initialize() {}
  */
 void autonomous() {
 
-	pros::Task auton_task1 (frontUpAutonTask);
-	pros::Task auton_task2 (frontDownAutonTask);
+	armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
+	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
+	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
 
+
+	left_side();
 
 	// 260 skills
 	//
@@ -128,13 +130,17 @@ void autonomous() {
 
 void opcontrol() {
 
+	armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
+	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
+	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
+
 
 
 	pros::lcd::set_text(1, "Driving");
 
 
-		frontGoUp = false;
-		frontGoDown = false;
+		// frontGoUp = false;
+		// frontGoDown = false;
 
 
 		int piston_front_value = 0;
@@ -152,7 +158,8 @@ void opcontrol() {
 
 
 
-
+	pros::task_t back_mogo_control_task = pros::c::task_create(backMogoControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+	TASK_STACK_DEPTH_DEFAULT, "My Task");
 	pros::Task my_cpp_task (back_mogo_control_task);
 
 

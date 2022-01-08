@@ -82,6 +82,7 @@ void opcontrol(void);
 #include "subSystems/tasks.hpp"
 #include "subSystems/builders.hpp"
 #include "okapi/api.hpp"
+#include "subSystems/auton.hpp"
 
 
 

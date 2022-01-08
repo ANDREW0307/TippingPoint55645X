@@ -37,7 +37,6 @@ extern pros::ADIButton bumper_back_down;
 
 // limit switches in the arms that detect mogos
 extern pros::ADIDigitalIn limit_front;
-extern pros::ADIDigitalIn limit_back;
 
 // vex v5 controller
 extern pros::Controller master;

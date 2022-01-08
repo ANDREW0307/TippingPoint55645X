@@ -1,5 +1,8 @@
 #include "main.h"
 
+#include "main.h"
+
+
 int back_mogo_velocity = 0;
 
 void backMogoControl(void *param) {
@@ -46,36 +49,4 @@ void backMogoControl(void *param) {
 
 		}
 
-}
-
-
-
-
-
-void front_mogo_up(void *param) {
-
-	while (true) {
-		if (!bumper_front_up.get_value() && frontGoUp) {
-			armLeft.move_velocity(200);
-			armRight.move_velocity(200);
-		} else {
-			armLeft.move_velocity(0);
-			armRight.move_velocity(0);
-		}
-		pros::delay(80);
-	}
-
-}
-
-void front_mogo_down(void *param) {
-	while (true) {
-		if (!bumper_front_down.get_value() && frontGoDown) {
-			armLeft.move_velocity(-200);
-			armRight.move_velocity(-200);
-		} else {
-			armLeft.move_velocity(0);
-			armRight.move_velocity(0);
-		}
-		pros::delay(80);
-	}
 }

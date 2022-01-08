@@ -1,7 +1,7 @@
 #include "main.h"
 
-extern bool frontGoUp;
-extern bool frontGoDown;
+// extern bool frontGoUp;
+// extern bool frontGoDown;
 
 // velocity used in driver control along with the control function / task
 extern int back_mogo_velocity;
@@ -11,6 +11,6 @@ extern int back_mogo_velocity;
 extern void backMogoControl(void *param);
 
 
-// for auton 
+// for auton
 void front_mogo_up(void *param);
 void front_mogo_down(void *param);

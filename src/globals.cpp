@@ -26,10 +26,9 @@ pros::ADIDigitalOut back_piston('F');
 pros::ADIButton bumper_front_up({6,'C'});
 pros::ADIButton bumper_front_down({6,'E'});
 pros::ADIButton bumper_back_up({6,'D'});
-pros::ADIButton bumper_back_down({6,'H'});
+pros::ADIButton bumper_back_down('C');
 
-pros::ADIDigitalIn limit_front();
-pros::ADIDigitalIn limit_back();
+pros::ADIDigitalIn limit_front({6, 'H'});
 
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
