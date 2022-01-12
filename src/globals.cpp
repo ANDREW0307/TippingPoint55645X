@@ -30,5 +30,7 @@ pros::ADIButton bumper_back_down('C');
 
 pros::ADIDigitalIn limit_front({6, 'H'});
 
+pros::ADIAnalogIn lineTracker_back('D');
+
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);

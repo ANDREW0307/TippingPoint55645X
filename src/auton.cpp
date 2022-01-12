@@ -96,6 +96,19 @@ void frontGrabbing(void *param) {
   }
 }
 
+bool holdOnBack = true;
+
+void backGrabbing(void *param) {
+  while (true) {
+    if (lineTracker_back.get_value() < 2000 && holdOnBack) {
+      back_piston.set_value(true);
+    } else {
+      back_piston.set_value(false);
+    }
+    pros::delay(100);
+  }
+}
+
 
 void left_side() {
 
@@ -109,10 +122,14 @@ void left_side() {
   //
   // pros::task_t frontGrabbingTask = pros::c::task_create(frontGrabbing, (void*)"PROS", TASK_PRIORITY_DEFAULT,
   // TASK_STACK_DEPTH_DEFAULT, "My Task");
+
+  // pros::task_t backGrabbingTask = pros::c::task_create(backGrabbing, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+  // TASK_STACK_DEPTH_DEFAULT, "My Task");
   //
   //
   // pros::Task auton_task1 (frontUpAutonTask);
   // pros::Task auton_task2 (frontGrabbingTask);
+  // pros::Task auton_task3 (backGrabbingTask);
   //
   //
   // chassis->setState({0_ft,0_ft, 0_deg});
