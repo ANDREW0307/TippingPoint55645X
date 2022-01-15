@@ -1,7 +1,5 @@
 #include "main.h"
 
-#include "main.h"
-
 
 int back_mogo_velocity = 0;
 
@@ -45,8 +43,49 @@ void backMogoControl(void *param) {
 				back_mogo_velocity = 0;
 			}
 
-			pros::delay(20);
+			pros::delay(40);
 
 		}
 
 }
+
+
+	int conveyorVelocity = 0;
+
+	void conveyorControl(void *param) {
+		while (true) {
+
+			bool isPressedConveyorFWD = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT);
+			bool isPressedConveyorREV = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT);
+
+			// garbage code, write the more effeicient way later
+			if(isPressedConveyorFWD && conveyor.get_target_velocity() == 0){
+				conveyorVelocity = 600;
+			}
+
+			if(isPressedConveyorFWD && conveyor.get_target_velocity() == 600){
+				conveyorVelocity = 0;
+			}
+
+			if(isPressedConveyorREV && conveyor.get_target_velocity() == 0) {
+				conveyorVelocity = -600;
+			}
+
+			if(isPressedConveyorREV && conveyor.get_target_velocity() == -600) {
+				conveyorVelocity = 0;
+			}
+
+			if(isPressedConveyorFWD && conveyor.get_target_velocity() == -600) {
+				conveyorVelocity = 600;
+			}
+
+
+			if(isPressedConveyorREV && conveyor.get_target_velocity() == 600) {
+				conveyorVelocity = -600;
+			}
+
+
+
+			pros::delay(80);
+		}
+	}

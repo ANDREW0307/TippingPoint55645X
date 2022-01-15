@@ -66,7 +66,9 @@ void autonomous() {
 	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
 
 
-	left_side();
+	// left_side();
+
+	skills_260();
 
 	// 260 skills
 	//
@@ -133,6 +135,7 @@ void opcontrol() {
 	armLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
 	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
 	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
+	conveyor.set_brake_mode(MOTOR_BRAKE_COAST);
 
 
 
@@ -146,7 +149,7 @@ void opcontrol() {
 		int piston_front_value = 0;
 		int piston_back_value = 0;
 
-		bool conveyorON = false;
+
 
 		bool isUpBackMogo = true;
 
@@ -162,6 +165,9 @@ void opcontrol() {
 	TASK_STACK_DEPTH_DEFAULT, "My Task");
 	pros::Task my_cpp_task (back_mogo_control_task);
 
+	pros::task_t conveyor_control_task = pros::c::task_create(conveyorControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+	TASK_STACK_DEPTH_DEFAULT, "My Task");
+	pros::Task conveyortaskInit (conveyor_control_task);
 
 
 	while (true) {
@@ -183,7 +189,12 @@ void opcontrol() {
 		bool isPressedFrontPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
 
 
+
+
 		back_mogo.move_velocity(back_mogo_velocity);
+
+		conveyor.move_velocity(conveyorVelocity);
+
 
 
 		//front claw piston - top left trigger
@@ -206,10 +217,6 @@ void opcontrol() {
 		if (back_mogo.get_voltage() < -1000 && back_mogo.get_voltage() ) {
 			back_piston.set_value(true);
 		}
-
-
-		std::string s = std::to_string(42);
-		pros::lcd::set_text(5, std::to_string(piston_back_value));
 
 
 

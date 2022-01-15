@@ -11,6 +11,11 @@ extern int back_mogo_velocity;
 extern void backMogoControl(void *param);
 
 
+
+extern int conveyorVelocity;
+extern void conveyorControl(void *param);
+
+
 // for auton
 void front_mogo_up(void *param);
 void front_mogo_down(void *param);
