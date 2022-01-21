@@ -44,3 +44,55 @@
 //
 // chassis->driveToPoint({2_ft,-1_ft});
 // chassis->waitUntilSettled();
+
+
+
+
+
+
+
+
+
+
+
+  // 
+  //
+  //
+  // resetAll();
+  // drivePIDFn(-1350, -1350, 100, 100, .38);
+  // reset_drive();
+  //
+  // pros::delay(1000);
+  //
+  //
+  // drivePIDFn(850, 850, 100, 100, .38);
+  // reset_drive();
+  //
+  //   backGoUp = false;
+  //   backGoDown = true;
+  //
+  //   holdOnBack = false;
+  //
+  //   frontGoUp = false;
+  //
+  //     armLeft.move_relative(-725, 200);
+  //     armRight.move_relative(-725, 200);
+  //
+  //   profileControllerFast->generatePath({{0_ft, 0_ft, 0_deg}, {1.5_ft, 0_ft, 0_deg}}, "D");
+  //   profileControllerFast->setTarget("D", false, false);
+  //   profileControllerFast->waitUntilSettled();
+  //
+  //   armLeft.move_relative(-800, 200);
+  //   armRight.move_relative(-800, 200);
+  //
+  //   pros::delay(500);
+  //
+  //   holdOnFront = false;
+  //
+  //   pros::delay(500);
+  //
+  //   drivePIDFn(-850, -850, 50, 100, .1);
+  //   reset_drive();
+  //
+  //   drivePIDFn(-800, 800, 25, 100, .3);
+  //   reset_drive();

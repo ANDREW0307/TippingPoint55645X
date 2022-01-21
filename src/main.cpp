@@ -46,7 +46,22 @@ void initialize() {
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
+void competition_initialize() {
+
+		inertial.reset();
+
+		while(inertial.is_calibrating()) {
+			pros::lcd::set_text(1, "inertial is calibrating");
+			pros::delay(300);
+		}
+
+
+
+		pros::lcd::set_text(1, "inertial is done calibrating");
+
+
+
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -65,10 +80,12 @@ void autonomous() {
 	armRight.set_brake_mode(MOTOR_BRAKE_HOLD);
 	back_mogo.set_brake_mode(MOTOR_BRAKE_HOLD);
 
+	testingAuton();
+
 
 	// left_side();
 
-	skills_260();
+	// skills_260();
 
 	// 260 skills
 	//
@@ -189,6 +206,19 @@ void opcontrol() {
 		bool isPressedFrontPiston = master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1);
 
 
+		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+			frontLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
+		  frontRight.set_brake_mode(MOTOR_BRAKE_HOLD);
+		  backLeft.set_brake_mode(MOTOR_BRAKE_HOLD);
+		  backRight.set_brake_mode(MOTOR_BRAKE_HOLD);
+		} else {
+			frontLeft.set_brake_mode(MOTOR_BRAKE_COAST);
+			frontRight.set_brake_mode(MOTOR_BRAKE_COAST);
+			backLeft.set_brake_mode(MOTOR_BRAKE_COAST);
+			backRight.set_brake_mode(MOTOR_BRAKE_COAST);
+		}
+
+
 
 
 		back_mogo.move_velocity(back_mogo_velocity);
@@ -210,11 +240,13 @@ void opcontrol() {
 
 
 
+
+
 		if (back_mogo.get_voltage() > 1000) {
 			back_piston.set_value(false);
 		}
 
-		if (back_mogo.get_voltage() < -1000 && back_mogo.get_voltage() ) {
+		if (back_mogo.get_voltage() < -1000) {
 			back_piston.set_value(true);
 		}
 
