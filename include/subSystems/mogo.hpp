@@ -18,4 +18,7 @@ extern void conveyorControl(void *param);
 
 // for auton
 void front_mogo_up(void *param);
+void back_mogo_up(void *param);
+void frontGrabbing(void *param);
+void backGrabbing(void *param);
 void front_mogo_down(void *param);
